@@ -38,12 +38,16 @@ def plot_sim_results(s0=0.99, i0=0.01, r0=0, tao=0.8, kappa=4, log=False):
     t, s, i, r, stop_t, sol = run_simulation(
         s0, i0, r0, tao, kappa, log
     )
+
+    title = f"SIR Model s0={s0}, i0={i0}, r0={r0}, tao={tao}, kappa={kappa}"
+
     print("Stopping Condition at", stop_t)
     
     plt.plot(t, s, label="Susceptible %")
     plt.plot(t, i, label="Infected %")
     plt.plot(t, r, label="Recovered %")
-    plt.title(f"SIR Model vs Time s0={s0} i0={i0} r0={r0} tao={tao} kappa={kappa}")
+
+    plt.title(title)
     plt.xlabel("time")
     plt.ylabel("proportion of population")
     
