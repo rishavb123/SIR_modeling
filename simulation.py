@@ -98,7 +98,7 @@ def get_results(title: str) -> Union[None, Any]:
     Returns:
         Union[None, Any]: The results or None if the files do not exist
     """
-    dr = f"results/{title}/"
+    dr = f"results/sims/{title}/"
     if os.path.isdir(dr):
         with open(f"{dr}/sol.pkl", "rb") as f:
             return pickle.load(f)
@@ -112,7 +112,7 @@ def store_results(title: str, sol: Any) -> None:
         title (str): The folder to create and store the results to
         sol (Any): The simulation solution results
     """
-    dr = f"results/{title}/"
+    dr = f"results/sims/{title}/"
     if not os.path.isdir(dr):
         os.mkdir(dr)
     with open(f"{dr}/sol.pkl", "wb") as f:
@@ -127,6 +127,7 @@ def simulation_results(
     kappa: float = 4,
     log: bool = False,
     force_run: bool = False,
+    plot: bool = False,
 ) -> Any:
     """Gets the simulation results either through a run or from stored results and plots them
 
@@ -138,6 +139,7 @@ def simulation_results(
         kappa (float, optional): The recovery time. Defaults to 4.
         log (bool, optional): Whether to print the full results. Defaults to False.
         force_run (bool, optional): Whether to force a new run of the simulation. Defaults to False.
+        plot (bool, optional): Whether or not to show the plot of the results. Defaults to False
 
     Returns:
         Any: The simulation solution results including many solution properties
@@ -165,8 +167,10 @@ def simulation_results(
 
     plt.legend()
     if not loaded:
-        plt.savefig(f"results/{title}/plot.png")
-    plt.show()
+        plt.savefig(f"results/sims/{title}/plot.png")
+
+    if plot:
+        plt.show()
 
     return sol
 
@@ -214,13 +218,32 @@ def get_args() -> argparse.Namespace:
         "-k", "--kappa", type=float, default=4, help="The recovery time parameter"
     )
 
-    parser.add_argument("-l", "--log", action="store_true", default=False)
-    parser.add_argument("-f", "--force_run", action="store_true", default=False)
+    parser.add_argument(
+        "-l",
+        "--log",
+        action="store_true",
+        default=False,
+        help="Whether or not to log the full results",
+    )
+    parser.add_argument(
+        "-f",
+        "--force_run",
+        action="store_true",
+        default=False,
+        help="Whether or not to force a new simulation run",
+    )
+    parser.add_argument(
+        "-p",
+        "--plot",
+        action="store_true",
+        default=False,
+        help="Whether or not to plot the results",
+    )
 
     return parser.parse_args()
 
 
-def main():
+def main() -> None:
     """main runner function"""
     args = get_args()
     _ = simulation_results(
