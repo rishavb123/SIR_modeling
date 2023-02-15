@@ -9,7 +9,9 @@ import scipy.integrate
 import matplotlib.pyplot as plt
 
 plt.style.use("dark_background")
-
+start_t = 0
+end_t = 10000
+t_N = (end_t - start_t) * 10
 
 def f(t: float, x: List[float], tao: float = 0.8, kappa: float = 4) -> List[float]:
     """The differential equation governing the SIR model
@@ -58,17 +60,13 @@ def run_simulation(
 
     stopping_condition.terminal = True
 
-    start_t = 0
-    end_t = 100
-    N = 1000
-
     result = scipy.integrate.solve_ivp(
         f,
-        (0, 100),
+        (start_t, end_t),
         x0,
         events=[stopping_condition],
         args=(tao, kappa),
-        t_eval=np.linspace(start_t, end_t, N),
+        t_eval=np.linspace(start_t, end_t, t_N),
     )
 
     if log:
@@ -86,7 +84,7 @@ def unpack_values(result: Any) -> Tuple[np.array, np.array, np.array, np.array, 
     Returns:
         Tuple[np.array, np.array, np.array, np.array, float]: time array, susceptible array, infected array, recovered array, t at which the stopping condition was met
     """
-    return result.t, result.y[0], result.y[1], result.y[2], result.t_events[0][0]
+    return result.t, result.y[0], result.y[1], result.y[2], result.t_events[0][0] if len(result.t_events[0]) > 0 else end_t
 
 
 def get_results(title: str) -> Union[None, Any]:
@@ -127,7 +125,8 @@ def simulation_results(
     kappa: float = 4,
     log: bool = False,
     force_run: bool = False,
-    plot: bool = False,
+    show_plot: bool = False,
+    generate_plot: bool = True,
 ) -> Any:
     """Gets the simulation results either through a run or from stored results and plots them
 
@@ -139,8 +138,8 @@ def simulation_results(
         kappa (float, optional): The recovery time. Defaults to 4.
         log (bool, optional): Whether to print the full results. Defaults to False.
         force_run (bool, optional): Whether to force a new run of the simulation. Defaults to False.
-        plot (bool, optional): Whether or not to show the plot of the results. Defaults to False
-
+        show_plot (bool, optional): Whether or not to show the plot of the results. Defaults to False
+        generate_plot (bool, optional): Whether or not to generate the plot of the results. Defaults to True
     Returns:
         Any: The simulation solution results including many solution properties
     """
@@ -155,22 +154,21 @@ def simulation_results(
 
     t, s, i, r, stop_t = unpack_values(sol)
 
-    print("Stopping Condition at", stop_t)
+    if generate_plot:
+        plt.plot(t, s, label="Susceptible %")
+        plt.plot(t, i, label="Infected %")
+        plt.plot(t, r, label="Recovered %")
 
-    plt.plot(t, s, label="Susceptible %")
-    plt.plot(t, i, label="Infected %")
-    plt.plot(t, r, label="Recovered %")
+        plt.title(title)
+        plt.xlabel("time")
+        plt.ylabel("proportion of population")
 
-    plt.title(title)
-    plt.xlabel("time")
-    plt.ylabel("proportion of population")
+        plt.legend()
+        if not loaded:
+            plt.savefig(f"results/sims/{title}/plot.png")
 
-    plt.legend()
-    if not loaded:
-        plt.savefig(f"results/sims/{title}/plot.png")
-
-    if plot:
-        plt.show()
+        if show_plot:
+            plt.show()
 
     return sol
 
@@ -246,7 +244,7 @@ def get_args() -> argparse.Namespace:
 def main() -> None:
     """main runner function"""
     args = get_args()
-    _ = simulation_results(
+    sol = simulation_results(
         s0=args.s0,
         i0=args.i0,
         r0=args.r0,
@@ -254,7 +252,11 @@ def main() -> None:
         kappa=args.kappa,
         log=args.log,
         force_run=args.force_run,
+        show_plot=args.plot,
+        generate_plot=True,
     )
+    print("Stopping Condition at t =", sol.t_events[0][0])
+
 
 
 if __name__ == "__main__":
