@@ -32,17 +32,18 @@ def run_simulation(s0=0.99, i0=0.01, r0=0, tao=0.8, kappa=4, log=False):
     if log:
         print(result)
     
-    return result.t, result.y[0], result.y[1], result.y[2], result
+    return result.t, result.y[0], result.y[1], result.y[2], result.t_events[0][0], result
 
 def plot_sim_results(s0=0.99, i0=0.01, r0=0, tao=0.8, kappa=4, log=False):
-    t, s, i, r, sol = run_simulation(
+    t, s, i, r, stop_t, sol = run_simulation(
         s0, i0, r0, tao, kappa, log
     )
+    print("Stopping Condition at", stop_t)
     
     plt.plot(t, s, label="Susceptible %")
     plt.plot(t, i, label="Infected %")
     plt.plot(t, r, label="Recovered %")
-    plt.title(f"SIR Model vs Time {} {} {} {} {}")
+    plt.title(f"SIR Model vs Time s0={s0} i0={i0} r0={r0} tao={tao} kappa={kappa}")
     plt.xlabel("time")
     plt.ylabel("proportion of population")
     
@@ -54,7 +55,6 @@ def plot_sim_results(s0=0.99, i0=0.01, r0=0, tao=0.8, kappa=4, log=False):
 
 def main():
     sol = plot_sim_results()
-    print("Stopping Condition at", sol.t_events[0][0])
     
     
 if __name__ == "__main__":
