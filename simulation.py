@@ -12,7 +12,7 @@ def f(t, x, tao, kappa):
         i / kappa
     ]
 
-def simulation(s0=0.99, i0=0.01, r0=0, tao=0.8, kappa=4, log=False):
+def run_simulation(s0=0.99, i0=0.01, r0=0, tao=0.8, kappa=4, log=False):
     assert i0 + s0 + r0 == 1, "Initial conditions must sum to 1"
     
     x0 = [s0, i0, r0]
@@ -35,7 +35,7 @@ def simulation(s0=0.99, i0=0.01, r0=0, tao=0.8, kappa=4, log=False):
     return result.t, result.y[0], result.y[1], result.y[2], result
 
 def plot_sim_results(s0=0.99, i0=0.01, r0=0, tao=0.8, kappa=4, log=False):
-    t, s, i, r, sol = simulation(
+    t, s, i, r, sol = run_simulation(
         s0, i0, r0, tao, kappa, log
     )
     
