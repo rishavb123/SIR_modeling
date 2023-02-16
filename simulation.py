@@ -13,13 +13,27 @@ start_t = 0
 end_t = 10000
 t_N = (end_t - start_t) * 10
 
+def zero_policy(s: float, i: float, r: float, v: float) -> float:
+    """Vaccination policy that always returns 0
+
+    Args:
+        s (float): The current susceptible proportion
+        i (float): The current infected proportion
+        r (float): The current recovered proportion
+        v (float): The current vaccinated proportion
+
+    Returns:
+        float: the derivative of the vaccinated proportion
+    """
+    return 0
+
 
 def f(
     t: float,
     x: List[float],
     tao: float = 0.8,
     kappa: float = 4,
-    vaccination_policy: Callable = lambda s, i, r, v: 0,
+    vaccination_policy: Callable = zero_policy,
 ) -> List[float]:
     """The differential equation governing the SIR model
 
@@ -48,7 +62,7 @@ def run_simulation(
     tao: float = 0.8,
     kappa: float = 4,
     log: bool = False,
-    vaccination_policy: Callable = lambda s, i, r, v: 0,
+    vaccination_policy: Callable = zero_policy,
 ) -> Any:
     """Runs the simulation by solving the IVP
 
@@ -150,7 +164,7 @@ def simulation_results(
     force_run: bool = False,
     show_plot: bool = False,
     generate_plot: bool = True,
-    vaccination_policy: Callable = lambda s, i, r, v: 0,
+    vaccination_policy: Callable = zero_policy,
 ) -> Any:
     """Gets the simulation results either through a run or from stored results and plots them
 
@@ -169,7 +183,7 @@ def simulation_results(
     Returns:
         Any: The simulation solution results including many solution properties
     """
-    title = f"sir_model_s0_{s0}_i0_{i0}_r0_{r0}_v0_{v0}_tao_{tao}_kappa_{kappa}"
+    title = f"sir_model_s0_{s0}_i0_{i0}_r0_{r0}_v0_{v0}_tao_{tao}_kappa_{kappa}_{vaccination_policy.__name__}"
 
     sol = get_results(title) if not force_run else None
     loaded = not sol is None
