@@ -104,14 +104,14 @@ def run_simulation(
     return result
 
 
-def unpack_values(result: Any) -> Tuple[np.array, np.array, np.array, np.array, float]:
+def unpack_values(result: Any) -> Tuple[np.array, np.array, np.array, np.array, np.array, float]:
     """Unpacks the values from the results
 
     Args:
         result (Any): The simulation solution results
 
     Returns:
-        Tuple[np.array, np.array, np.array, np.array, float]: time array, susceptible array, infected array, recovered array, t at which the stopping condition was met
+        Tuple[np.array, np.array, np.array, np.array, np.array, float]: time array, susceptible array, infected array, recovered array, vaccinated array, t at which the stopping condition was met
     """
     return (
         result.t,
@@ -164,6 +164,7 @@ def simulation_results(
     force_run: bool = False,
     show_plot: bool = False,
     generate_plot: bool = True,
+    save_results: bool = True,
     vaccination_policy: Callable = zero_policy,
 ) -> Any:
     """Gets the simulation results either through a run or from stored results and plots them
@@ -179,6 +180,7 @@ def simulation_results(
         force_run (bool, optional): Whether to force a new run of the simulation. Defaults to False.
         show_plot (bool, optional): Whether or not to show the plot of the results. Defaults to False.
         generate_plot (bool, optional): Whether or not to generate the plot of the results. Defaults to True.
+        save_results (bool, optional): Whether or not to save the results of the plot and the solution. Defaults to True.
         vaccination_policy (Callable, optional): The vaccination rate dV/dt given s, i, r, and v. Defaults to 0.
     Returns:
         Any: The simulation solution results including many solution properties
@@ -190,7 +192,8 @@ def simulation_results(
 
     if not loaded:
         sol = run_simulation(s0=s0, i0=i0, r0=r0, v0=v0, tao=tao, kappa=kappa, log=log, vaccination_policy=vaccination_policy)
-        store_results(title, sol)
+        if save_results:
+            store_results(title, sol)
 
     t, s, i, r, v, stop_t = unpack_values(sol)
 
@@ -205,7 +208,7 @@ def simulation_results(
         plt.ylabel("proportion of population")
 
         plt.legend()
-        if not loaded:
+        if not loaded and save_results:
             plt.savefig(f"results/sims/{title}/plot.png")
 
         if show_plot:
@@ -303,6 +306,8 @@ def main() -> None:
         force_run=args.force_run,
         show_plot=args.plot,
         generate_plot=True,
+        store_results=True,
+        vaccination_policy=zero_policy,
     )
     print("Stopping Condition at t =", sol.t_events[0][0])
 
