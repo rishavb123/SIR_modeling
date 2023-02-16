@@ -306,7 +306,7 @@ def main() -> None:
         force_run=args.force_run,
         show_plot=args.plot,
         generate_plot=True,
-        store_results=True,
+        save_results=True,
         vaccination_policy=zero_policy,
     )
     print("Stopping Condition at t =", sol.t_events[0][0])
