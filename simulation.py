@@ -34,7 +34,10 @@ def f(
         List[float]: The derivative of the state vector
     """
     s, i, r, v = x
-    return [-tao * s * i, tao * s * i - i / kappa, i / kappa, vaccination_policy(s, i, r, v)]
+
+    dV_dt = vaccination_policy(s, i, r, v)
+
+    return [-tao * s * i - dV_dt, tao * s * i - i / kappa, i / kappa, dV_dt]
 
 
 def run_simulation(
