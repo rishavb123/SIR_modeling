@@ -1,4 +1,4 @@
-from typing import Any, List, Tuple, Union
+from typing import Any, List, Tuple, Union, Callable
 
 import os
 
@@ -13,7 +13,14 @@ start_t = 0
 end_t = 10000
 t_N = (end_t - start_t) * 10
 
-def f(t: float, x: List[float], tao: float = 0.8, kappa: float = 4) -> List[float]:
+
+def f(
+    t: float,
+    x: List[float],
+    tao: float = 0.8,
+    kappa: float = 4,
+    vaccination_policy: Callable = lambda s, i, r, v: 0,
+) -> List[float]:
     """The differential equation governing the SIR model
 
     Args:
@@ -21,21 +28,24 @@ def f(t: float, x: List[float], tao: float = 0.8, kappa: float = 4) -> List[floa
         x (List[float]): The current state vector
         tao (float, optional): The infection rate. Defaults to 0.8.
         kappa (float, optional): The recovery time. Defaults to 4.
+        vaccination_policy (Callable, optional): The vaccination rate dV/dt given s, i, r, and v. Defaults to 0.
 
     Returns:
         List[float]: The derivative of the state vector
     """
-    s, i, _ = x
-    return [-tao * s * i, tao * s * i - i / kappa, i / kappa]
+    s, i, r, v = x
+    return [-tao * s * i, tao * s * i - i / kappa, i / kappa, vaccination_policy(s, i, r, v)]
 
 
 def run_simulation(
     s0: float = 0.99,
     i0: float = 0.01,
     r0: float = 0,
+    v0: float = 0,
     tao: float = 0.8,
     kappa: float = 4,
     log: bool = False,
+    vaccination_policy: Callable = lambda s, i, r, v: 0,
 ) -> Any:
     """Runs the simulation by solving the IVP
 
@@ -43,19 +53,21 @@ def run_simulation(
         s0 (float, optional): The initial susceptible population proportion. Defaults to 0.99.
         i0 (float, optional): The initial infected population proportion. Defaults to 0.01.
         r0 (float, optional): The initial recovered population proportion. Defaults to 0.
+        v0 (float, optional): The initial vaccinated population proportion. Defaults to 0.
         tao (float, optional): The infection rate. Defaults to 0.8.
         kappa (float, optional): The recovery time. Defaults to 4.
         log (bool, optional): Whether or not to log the results. Defaults to False.
-
+        vaccination_policy (Callable, optional): The vaccination rate dV/dt given s, i, r, and v. Defaults to 0.
+        
     Returns:
         Any: The solution of the IVP
     """
-    assert i0 + s0 + r0 == 1, "Initial conditions must sum to 1"
+    assert i0 + s0 + r0 + v0 == 1, "Initial conditions must sum to 1"
 
-    x0 = [s0, i0, r0]
+    x0 = [s0, i0, r0, v0]
 
-    def stopping_condition(t, x, tao, kappa):
-        _, i, _ = x
+    def stopping_condition(t, x, tao, kappa, vaccination_policy):
+        _, i, _, _ = x
         return i - 1e-4
 
     stopping_condition.terminal = True
@@ -65,7 +77,7 @@ def run_simulation(
         (start_t, end_t),
         x0,
         events=[stopping_condition],
-        args=(tao, kappa),
+        args=(tao, kappa, vaccination_policy),
         t_eval=np.linspace(start_t, end_t, t_N),
     )
 
@@ -84,7 +96,14 @@ def unpack_values(result: Any) -> Tuple[np.array, np.array, np.array, np.array, 
     Returns:
         Tuple[np.array, np.array, np.array, np.array, float]: time array, susceptible array, infected array, recovered array, t at which the stopping condition was met
     """
-    return result.t, result.y[0], result.y[1], result.y[2], result.t_events[0][0] if len(result.t_events[0]) > 0 else end_t
+    return (
+        result.t,
+        result.y[0],
+        result.y[1],
+        result.y[2],
+        result.y[3],
+        result.t_events[0][0] if len(result.t_events[0]) > 0 else end_t,
+    )
 
 
 def get_results(title: str) -> Union[None, Any]:
@@ -121,12 +140,14 @@ def simulation_results(
     s0: float = 0.99,
     i0: float = 0.01,
     r0: float = 0,
+    v0: float = 0,
     tao: float = 0.8,
     kappa: float = 4,
     log: bool = False,
     force_run: bool = False,
     show_plot: bool = False,
     generate_plot: bool = True,
+    vaccination_policy: Callable = lambda s, i, r, v: 0,
 ) -> Any:
     """Gets the simulation results either through a run or from stored results and plots them
 
@@ -134,30 +155,33 @@ def simulation_results(
         s0 (float, optional): The initial susceptible population proportion. Defaults to 0.99.
         i0 (float, optional): The initial infected population proportion. Defaults to 0.01.
         r0 (float, optional): The initial recovered population proportion. Defaults to 0.
+        v0 (float, optional): The initial vaccinated population proportion. Defaults to 0.
         tao (float, optional): The infection rate. Defaults to 0.8.
         kappa (float, optional): The recovery time. Defaults to 4.
         log (bool, optional): Whether to print the full results. Defaults to False.
         force_run (bool, optional): Whether to force a new run of the simulation. Defaults to False.
-        show_plot (bool, optional): Whether or not to show the plot of the results. Defaults to False
-        generate_plot (bool, optional): Whether or not to generate the plot of the results. Defaults to True
+        show_plot (bool, optional): Whether or not to show the plot of the results. Defaults to False.
+        generate_plot (bool, optional): Whether or not to generate the plot of the results. Defaults to True.
+        vaccination_policy (Callable, optional): The vaccination rate dV/dt given s, i, r, and v. Defaults to 0.
     Returns:
         Any: The simulation solution results including many solution properties
     """
-    title = f"sir_model_s0_{s0}_i0_{i0}_r0_{r0}_tao_{tao}_kappa_{kappa}"
+    title = f"sir_model_s0_{s0}_i0_{i0}_r0_{r0}_v0_{v0}_tao_{tao}_kappa_{kappa}"
 
     sol = get_results(title) if not force_run else None
     loaded = not sol is None
 
     if not loaded:
-        sol = run_simulation(s0=s0, i0=i0, r0=r0, tao=tao, kappa=kappa, log=log)
+        sol = run_simulation(s0=s0, i0=i0, r0=r0, v0=v0, tao=tao, kappa=kappa, log=log, vaccination_policy=vaccination_policy)
         store_results(title, sol)
 
-    t, s, i, r, stop_t = unpack_values(sol)
+    t, s, i, r, v, stop_t = unpack_values(sol)
 
     if generate_plot:
         plt.plot(t, s, label="Susceptible %")
         plt.plot(t, i, label="Infected %")
         plt.plot(t, r, label="Recovered %")
+        plt.plot(t, v, label="Vaccinated %")
 
         plt.title(title)
         plt.xlabel("time")
@@ -206,6 +230,13 @@ def get_args() -> argparse.Namespace:
         help="The initial recovered population proportion",
     )
     parser.add_argument(
+        "-v",
+        "--v0",
+        type=float,
+        default=0,
+        help="The initial vaccinated population proportion",
+    )
+    parser.add_argument(
         "-t",
         "--tao",
         type=float,
@@ -248,6 +279,7 @@ def main() -> None:
         s0=args.s0,
         i0=args.i0,
         r0=args.r0,
+        v0=args.v0,
         tao=args.tao,
         kappa=args.kappa,
         log=args.log,
@@ -256,7 +288,6 @@ def main() -> None:
         generate_plot=True,
     )
     print("Stopping Condition at t =", sol.t_events[0][0])
-
 
 
 if __name__ == "__main__":

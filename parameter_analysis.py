@@ -44,7 +44,7 @@ def run_simulations_over_parameter_space(
             show_plot=False,
             generate_plot=False,
         )
-        _, _, _, _, stop_t = unpack_values(sol)
+        _, _, _, _, _, stop_t = unpack_values(sol)
         stopping_ts[i, j] = stop_t
 
     return stopping_ts.T
