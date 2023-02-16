@@ -2,6 +2,7 @@ from typing import Callable
 
 import numpy as np
 import matplotlib.pyplot as plt
+from tqdm import tqdm
 
 from simulation import  simulation_results, unpack_values, get_args
 
@@ -22,18 +23,18 @@ def make_parameterized_policy(name: str = None, **kwargs) -> Callable:
     return policy_wrapper
 
 def test_policy(s, i, r, v, c):
-    return c * r * s
+    return c * s
 
 
 def main() -> None:
     """main runner function"""
     args = get_args()
 
-    c_space = np.linspace(0.1, 10, 100)
+    c_space = np.linspace(0, 2, 20)
     stop_ts = []
     final_vs = []
 
-    for c in c_space:
+    for c in tqdm(c_space):
 
         policy = make_parameterized_policy(name="not_test", c=c)(test_policy)
 
@@ -61,22 +62,24 @@ def main() -> None:
     def normalize(arr):
         return (arr - arr.min()) / (arr.max() - arr.min())
 
-    alpha = 0.5
-    beta = 0.5
+    alpha = 0.75
+    beta = 0.25
 
     stop_ts = normalize(stop_ts)
     final_vs = normalize(final_vs)
 
     scores = alpha * stop_ts + beta * final_vs
 
-    scores = normalize(scores)
+    # scores = normalize(scores)
 
-    plt.plot(c_space, scores)
-    plt.plot(c_space, stop_ts)
-    plt.plot(c_space, final_vs)
+    plt.plot(c_space, scores, label="scores")
+    plt.plot(c_space, stop_ts, label="Stop Ts")
+    plt.plot(c_space, final_vs, label="final vs")
 
-    c_opt = c_space[np.argmax(scores)]
+    c_opt = c_space[np.argmin(scores)]
     print(f"Optimal c parameter: {c_opt}")
+
+    plt.legend()
 
     plt.show()
 
