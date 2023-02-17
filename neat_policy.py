@@ -24,7 +24,7 @@ def neat_algorithm() -> None:
     """
     
     alpha = 0.5
-    beta = 0.5
+    beta = 0.25
 
     n_iterations = 100
 
@@ -43,7 +43,7 @@ def neat_algorithm() -> None:
     ) for _ in range(n_population)]
 
     def score(stop_t, final_v):
-        return -alpha * stop_t / 500 - beta * final_v
+        return -alpha * stop_t / 100 - beta * final_v
 
     def fitness(weights1, bias1, weights2, bias2, name="0"):
         policy = make_parameterized_policy(name=f"neural_policy_{name}", weights1=weights1, bias1=bias1, weights2=weights2, bias2=bias2)(neural_policy)
@@ -92,7 +92,7 @@ def neat_algorithm() -> None:
 
         p[p < thresh] = 0
 
-        p = p / p.sum()
+        p = (p - p.min()) / p.sum()
 
         parents_idx = np.random.choice(n_population, (n_population - n_keep, 2), p=p)
 
