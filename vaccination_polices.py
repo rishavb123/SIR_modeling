@@ -41,7 +41,7 @@ def try_policy(policy: Callable) -> Any:
     )
 
 def test_policy(s, i, r, v, c):
-    return c * s
+    return c * s / i
 
 @make_parameterized_policy(name="test_2", c=2)
 def test_policy_2(s, i, r, v, c):
@@ -84,7 +84,7 @@ def main() -> None:
         return (arr - arr.min()) / (arr.max() - arr.min())
 
     alpha = 0.75
-    beta = 0
+    beta = 0.25
 
     stop_ts = normalize(stop_ts)
     final_vs = normalize(final_vs)
