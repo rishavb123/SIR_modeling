@@ -25,7 +25,6 @@ def make_parameterized_policy(name: str = None, **kwargs) -> Callable:
 def test_policy(s, i, r, v, c):
     return c * s
 
-
 def main() -> None:
     """main runner function"""
     args = get_args()
@@ -63,14 +62,12 @@ def main() -> None:
         return (arr - arr.min()) / (arr.max() - arr.min())
 
     alpha = 0.75
-    beta = 0.25
+    beta = 0
 
     stop_ts = normalize(stop_ts)
     final_vs = normalize(final_vs)
 
     scores = alpha * stop_ts + beta * final_vs
-
-    # scores = normalize(scores)
 
     plt.plot(c_space, scores, label="scores")
     plt.plot(c_space, stop_ts, label="Stop Ts")
@@ -82,7 +79,6 @@ def main() -> None:
     plt.legend()
 
     plt.show()
-
 
 if __name__ == "__main__":
     main()
