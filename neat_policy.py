@@ -1,5 +1,5 @@
 import numpy as np
-import tqdm
+from tqdm import tqdm
 
 from simulation import simulation_results, unpack_values
 from vaccination_polices import make_parameterized_policy, try_policy
@@ -23,7 +23,7 @@ def neat_algorithm() -> None:
     """
     
     alpha = 0.5
-    beta = 0.25
+    beta = 0.1
 
     n_iterations = 200
 
@@ -55,7 +55,7 @@ def neat_algorithm() -> None:
         )
         t, s, i, r, v, stop_t = unpack_values(sol)
 
-        fitnesses.append(score(stop_t, v[-1]))
+        return score(stop_t, v[-1])
     
     def breed(e1, e2):
         return tuple(
