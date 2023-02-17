@@ -2,7 +2,7 @@ import numpy as np
 import tqdm
 
 from simulation import simulation_results, unpack_values
-from vaccination_polices import make_parameterized_policy
+from vaccination_polices import make_parameterized_policy, try_policy
 
 
 def neural_policy(s, i, r, v, weights1, bias1, weights2, bias2):
@@ -111,11 +111,11 @@ def test_neural_policy():
 
     policy = make_parameterized_policy(name=f"neural_policy_0", weights1=weights1, bias1=bias1, weights2=weights2, bias2=bias2)(neural_policy)
 
-    simulation_results(
-        force_run=True,
-        log=True,
-        show_plot=True,
-        generate_plot=True,
-        save_results=False,
-        vaccination_policy=policy
-    )
+    try_policy(policy)
+
+def main():
+    neat_algorithm()
+    test_neural_policy()
+
+if __name__ == "__main__":
+    main()

@@ -1,4 +1,4 @@
-from typing import Callable
+from typing import Callable, Any
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -22,8 +22,30 @@ def make_parameterized_policy(name: str = None, **kwargs) -> Callable:
         return policy
     return policy_wrapper
 
+def try_policy(policy: Callable) -> Any:
+    """Tries a policy out and generates simulation results with default parameters
+
+    Args:
+        policy (Callable): The vaccination policy
+
+    Returns:
+        Any: The simulation results
+    """
+    return simulation_results(
+        force_run=True,
+        log=True,
+        show_plot=True,
+        generate_plot=True,
+        save_results=False,
+        vaccination_policy=policy
+    )
+
 def test_policy(s, i, r, v, c):
     return c * s
+
+@make_parameterized_policy(name="test_2", c=2)
+def test_policy_2(s, i, r, v, c):
+    return c * s * s
 
 def main() -> None:
     """main runner function"""
@@ -35,7 +57,7 @@ def main() -> None:
 
     for c in tqdm(c_space):
 
-        policy = make_parameterized_policy(name="not_test", c=c)(test_policy)
+        policy = make_parameterized_policy(name="test_1", c=c)(test_policy)
 
         sol = simulation_results(
             s0=args.s0,
