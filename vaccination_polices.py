@@ -95,6 +95,10 @@ def main() -> None:
     plt.plot(c_space, stop_ts, label="Stop Ts")
     plt.plot(c_space, final_vs, label="final vs")
 
+    plt.xlabel("c")
+    plt.ylabel("metrics")
+    plt.title("Scores vs C Parameter")
+
     c_opt = c_space[np.argmin(scores)]
     print(f"Optimal c parameter: {c_opt}")
 

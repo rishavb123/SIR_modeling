@@ -1,4 +1,5 @@
 import numpy as np
+import matplotlib.pyplot as plt
 from tqdm import tqdm
 
 from simulation import simulation_results, unpack_values
@@ -16,21 +17,23 @@ def neural_policy(s, i, r, v, weights1, bias1, weights2, bias2):
     cur = 1 / (1 + np.exp(-cur))
 
     cur = cur[0][0]
-    return cur
+    return cur * s
 
 def neat_algorithm() -> None:
     """Runs the NEAT algorithm (Neuro-Evolution of Augmenting Topologies) to optimize the score defined by alpha and beta and then stores the model on disk
     """
     
     alpha = 0.5
-    beta = 0.1
+    beta = 0.5
 
-    n_iterations = 200
+    n_iterations = 100
 
     n_population = 50
-    n_keep = 5
+    n_keep = 1
 
     hidden_layer_dim = 10
+
+    plot_learning_curve = True
 
     population = [(
         np.random.random((hidden_layer_dim, 4)) * 2 - 1,
@@ -69,7 +72,7 @@ def neat_algorithm() -> None:
             for i in range(4)
         )
 
-    fitnesses = None
+    learning_curve = []
     
     iters = tqdm(range(n_iterations))
     for itr in iters:
@@ -79,9 +82,15 @@ def neat_algorithm() -> None:
             fitnesses.append(fitness(weights1, bias1, weights2, bias2, name=i))
 
         p = np.array(fitnesses)
-        p = p - np.min(p) + 1
+        p = p + 3
 
-        iters.set_description(f"Processing generation {itr}; Current best score: {p.max()}", refresh=True)
+        learning_curve.append(p.max())
+
+        iters.set_description(f"Processing generation {itr}; Current best score: {learning_curve[-1]}", refresh=True)
+
+        thresh = np.partition(p, -10)[-10]
+
+        p[p < thresh] = 0
 
         p = p / p.sum()
 
@@ -97,6 +106,11 @@ def neat_algorithm() -> None:
 
         population = new_pop
 
+    fitnesses = []
+    for i, e in enumerate(population):
+        weights1, bias1, weights2, bias2 = e
+        fitnesses.append(fitness(weights1, bias1, weights2, bias2, name=i))
+
     best = population[max(range(n_population), key=lambda i: fitnesses[i])]
 
     weights1, bias1, weights2, bias2 = best
@@ -105,6 +119,13 @@ def neat_algorithm() -> None:
     np.savetxt("results/models/bias1.csv", bias1, delimiter=',')
     np.savetxt("results/models/weights2.csv", weights2, delimiter=',')
     np.savetxt("results/models/bias2.csv", bias2, delimiter=',')
+
+    if plot_learning_curve:
+       plt.plot(learning_curve)
+       plt.title("NEAT learning curve")
+       plt.xlabel("generation")
+       plt.ylabel("best score")
+       plt.show()
 
 def test_neural_policy() -> None:
     """Tries out the current best neural policy generated from the NEAT algorithm above with default simulation parameters
