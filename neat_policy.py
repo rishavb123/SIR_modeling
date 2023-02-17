@@ -6,7 +6,6 @@ from vaccination_polices import make_parameterized_policy, try_policy
 
 
 def neural_policy(s, i, r, v, weights1, bias1, weights2, bias2):
-
     input_vec = np.array([[s, i, r, v]]).T
 
     cur = input_vec
@@ -19,7 +18,9 @@ def neural_policy(s, i, r, v, weights1, bias1, weights2, bias2):
     cur = cur[0][0]
     return cur
 
-def neat_algorithm():
+def neat_algorithm() -> None:
+    """Runs the NEAT algorithm (Neuro-Evolution of Augmenting Topologies) to optimize the score defined by alpha and beta and then stores the model on disk
+    """
     
     alpha = 0.5
     beta = 0.25
@@ -38,6 +39,9 @@ def neat_algorithm():
         np.random.random((1, 1)) * 2 - 1,
     ) for _ in range(n_population)]
 
+    def score(stop_t, final_v):
+        return -alpha * stop_t / 500 - beta * final_v
+
     def fitness(weights1, bias1, weights2, bias2, name="0"):
         policy = make_parameterized_policy(name=f"neural_policy_{name}", weights1=weights1, bias1=bias1, weights2=weights2, bias2=bias2)(neural_policy)
 
@@ -51,7 +55,7 @@ def neat_algorithm():
         )
         t, s, i, r, v, stop_t = unpack_values(sol)
 
-        return -alpha * stop_t / 500 - beta * v[-1]
+        fitnesses.append(score(stop_t, v[-1]))
     
     def breed(e1, e2):
         return tuple(
@@ -102,7 +106,9 @@ def neat_algorithm():
     np.savetxt("results/models/weights2.csv", weights2, delimiter=',')
     np.savetxt("results/models/bias2.csv", bias2, delimiter=',')
 
-def test_neural_policy():
+def test_neural_policy() -> None:
+    """Tries out the current best neural policy generated from the NEAT algorithm above with default simulation parameters
+    """
     hidden_layer_dim = 10
     weights1 = np.loadtxt("results/models/weights1.csv", delimiter=',', ).reshape((hidden_layer_dim, 4))
     bias1 = np.loadtxt("results/models/bias1.csv", delimiter=',').reshape((hidden_layer_dim, 1))
@@ -113,7 +119,9 @@ def test_neural_policy():
 
     try_policy(policy)
 
-def main():
+def main() -> None:
+    """main runner method
+    """
     neat_algorithm()
     test_neural_policy()
 
