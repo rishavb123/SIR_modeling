@@ -8,12 +8,14 @@ import numpy as np
 import scipy.integrate
 import matplotlib.pyplot as plt
 
-from vaccination_polices import zero_policy
+from vaccination_polices import zero_policy, example_policy
+from neat_policy import get_saved_neural_policy
 
 plt.style.use("dark_background")
 start_t = 0
 end_t = 10000
 t_N = (end_t - start_t) * 10
+
 
 def f(
     t: float,
@@ -62,7 +64,7 @@ def run_simulation(
         kappa (float, optional): The recovery time. Defaults to 4.
         log (bool, optional): Whether or not to log the results. Defaults to False.
         vaccination_policy (Callable, optional): The vaccination rate dV/dt given s, i, r, and v. Defaults to 0.
-        
+
     Returns:
         Any: The solution of the IVP
     """
@@ -91,7 +93,9 @@ def run_simulation(
     return result
 
 
-def unpack_values(result: Any) -> Tuple[np.array, np.array, np.array, np.array, np.array, float]:
+def unpack_values(
+    result: Any,
+) -> Tuple[np.array, np.array, np.array, np.array, np.array, float]:
     """Unpacks the values from the results
 
     Args:
@@ -153,6 +157,7 @@ def simulation_results(
     generate_plot: bool = True,
     save_results: bool = True,
     vaccination_policy: Callable = zero_policy,
+    show_vaccinations: bool = True,
 ) -> Any:
     """Gets the simulation results either through a run or from stored results and plots them
 
@@ -169,6 +174,8 @@ def simulation_results(
         generate_plot (bool, optional): Whether or not to generate the plot of the results. Defaults to True.
         save_results (bool, optional): Whether or not to save the results of the plot and the solution. Defaults to True.
         vaccination_policy (Callable, optional): The vaccination rate dV/dt given s, i, r, and v. Defaults to 0.
+        show_vaccinations (bool, optional): Whether or not to show the vaccinations in the graph. Defaults to True.
+
     Returns:
         Any: The simulation solution results including many solution properties
     """
@@ -178,7 +185,16 @@ def simulation_results(
     loaded = not sol is None
 
     if not loaded:
-        sol = run_simulation(s0=s0, i0=i0, r0=r0, v0=v0, tao=tao, kappa=kappa, log=log, vaccination_policy=vaccination_policy)
+        sol = run_simulation(
+            s0=s0,
+            i0=i0,
+            r0=r0,
+            v0=v0,
+            tao=tao,
+            kappa=kappa,
+            log=log,
+            vaccination_policy=vaccination_policy,
+        )
         if save_results:
             store_results(title, sol)
 
@@ -188,7 +204,8 @@ def simulation_results(
         plt.plot(t, s, label="Susceptible %")
         plt.plot(t, i, label="Infected %")
         plt.plot(t, r, label="Recovered %")
-        plt.plot(t, v, label="Vaccinated %")
+        if show_vaccinations:
+            plt.plot(t, v, label="Vaccinated %")
 
         plt.title(title)
         plt.xlabel("time")
@@ -210,6 +227,16 @@ def get_args() -> argparse.Namespace:
     Returns:
         argparse.Namespace: The arguments
     """
+
+    def vaccination_type(str):
+        neat_policy = get_saved_neural_policy()
+        d = {
+            "example": example_policy,
+            "zero": zero_policy,
+            "neat": neat_policy,
+            "neural": neat_policy,
+        }
+        return d[str.replace("_policy", "")]
 
     parser = argparse.ArgumentParser(
         prog="Simulation Runner",
@@ -275,9 +302,20 @@ def get_args() -> argparse.Namespace:
         default=False,
         help="Whether or not to plot the results",
     )
-    # parser.add_argument(
-        
-    # )
+    parser.add_argument(
+        "-vp",
+        "--vaccination-policy",
+        type=vaccination_type,
+        default=zero_policy,
+        help="The vaccination policy to use. e.g. zero_policy, example_policy, neat_policy, etc.",
+    )
+    parser.add_argument(
+        "-sv",
+        "--show-vaccinations",
+        action="store_true",
+        default=False,
+        help="Whether or not to show the vaccinations in the graph",
+    )
 
     return parser.parse_args()
 
@@ -297,7 +335,8 @@ def main() -> None:
         show_plot=args.plot,
         generate_plot=True,
         save_results=True,
-        vaccination_policy=zero_policy,
+        vaccination_policy=args.vaccination_policy,
+        show_vaccinations=args.show_vaccinations,
     )
     print("Stopping Condition at t =", sol.t_events[0][0])
 
