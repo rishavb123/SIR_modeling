@@ -22,10 +22,6 @@ def neural_policy(s, i, r, v, weights1, bias1, weights2, bias2):
 def neat_algorithm() -> None:
     """Runs the NEAT algorithm (Neuro-Evolution of Augmenting Topologies) to optimize the score defined by alpha and beta and then stores the model on disk
     """
-    
-    alpha = 0.5
-    beta = 0.25
-
     n_iterations = 100
 
     n_population = 50
@@ -42,9 +38,6 @@ def neat_algorithm() -> None:
         np.random.random((1, 1)) * 2 - 1,
     ) for _ in range(n_population)]
 
-    def score(stop_t, final_v):
-        return -alpha * stop_t / 100 - beta * final_v
-
     def fitness(weights1, bias1, weights2, bias2, name="0"):
         policy = make_parameterized_policy(name=f"neural_policy_{name}", weights1=weights1, bias1=bias1, weights2=weights2, bias2=bias2)(neural_policy)
 
@@ -57,8 +50,7 @@ def neat_algorithm() -> None:
             vaccination_policy=policy,
         )
         t, s, i, r, v, stop_t = unpack_values(sol)
-
-        return score(stop_t, v[-1])
+        return s[-1]
     
     def breed(e1, e2):
         return tuple(
