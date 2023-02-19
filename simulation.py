@@ -308,14 +308,14 @@ def get_args() -> argparse.Namespace:
         default=zero_policy,
         help="The vaccination policy to use. e.g. zero_policy, example_policy, neat_policy, etc.",
     )
+
     parser.add_argument(
-        "-sv",
-        "--show-vaccinations",
+        "-dsv",
+        "--dont-show-vaccinations",
         action="store_true",
         default=False,
         help="Whether or not to show the vaccinations in the graph",
     )
-
     parser.add_argument(
         "-dgp",
         "--dont-generate-plot",
@@ -350,7 +350,7 @@ def main() -> None:
         generate_plot=not args.dont_generate_plot,
         save_results=not args.dont_save_results,
         vaccination_policy=args.vaccination_policy,
-        show_vaccinations=args.show_vaccinations,
+        show_vaccinations=not args.dont_show_vaccinations,
     )
     print("Stopping Condition at t =", sol.t_events[0][0])
 
