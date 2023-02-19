@@ -8,25 +8,12 @@ import numpy as np
 import scipy.integrate
 import matplotlib.pyplot as plt
 
+from vaccination_polices import zero_policy
+
 plt.style.use("dark_background")
 start_t = 0
 end_t = 10000
 t_N = (end_t - start_t) * 10
-
-def zero_policy(s: float, i: float, r: float, v: float) -> float:
-    """Vaccination policy that always returns 0
-
-    Args:
-        s (float): The current susceptible proportion
-        i (float): The current infected proportion
-        r (float): The current recovered proportion
-        v (float): The current vaccinated proportion
-
-    Returns:
-        float: the derivative of the vaccinated proportion
-    """
-    return 0
-
 
 def f(
     t: float,
@@ -288,6 +275,9 @@ def get_args() -> argparse.Namespace:
         default=False,
         help="Whether or not to plot the results",
     )
+    # parser.add_argument(
+        
+    # )
 
     return parser.parse_args()
 
