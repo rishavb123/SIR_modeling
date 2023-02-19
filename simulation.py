@@ -8,8 +8,7 @@ import numpy as np
 import scipy.integrate
 import matplotlib.pyplot as plt
 
-from vaccination_polices import zero_policy, example_policy
-from neat_policy import get_saved_neural_policy
+from vaccination_polices import zero_policy, example_policy, get_saved_neural_policy
 
 plt.style.use("dark_background")
 start_t = 0
@@ -317,6 +316,21 @@ def get_args() -> argparse.Namespace:
         help="Whether or not to show the vaccinations in the graph",
     )
 
+    parser.add_argument(
+        "-dgp",
+        "--dont-generate-plot",
+        action="store_true",
+        default=False,
+        help="Set to not generate the plots"
+    )
+    parser.add_argument(
+        "-dsr",
+        "--dont-save-results",
+        action="store_true",
+        default=False,
+        help="Set to not save the results"
+    )
+
     return parser.parse_args()
 
 
@@ -333,8 +347,8 @@ def main() -> None:
         log=args.log,
         force_run=args.force_run,
         show_plot=args.plot,
-        generate_plot=True,
-        save_results=True,
+        generate_plot=not args.dont_generate_plot,
+        save_results=not args.dont_save_results,
         vaccination_policy=args.vaccination_policy,
         show_vaccinations=args.show_vaccinations,
     )
