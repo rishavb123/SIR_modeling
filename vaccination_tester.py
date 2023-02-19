@@ -47,8 +47,10 @@ def main() -> None:
     args = get_args()
 
     c_space = np.linspace(0, 2, 20)
+    final_ss = []
     stop_ts = []
     final_vs = []
+    final_rs = []
 
     for c in tqdm(c_space):
 
@@ -69,32 +71,26 @@ def main() -> None:
             vaccination_policy=policy,
         )
         t, s, i, r, v, stop_t = unpack_values(sol)
+
         stop_ts.append(stop_t)
         final_vs.append(v[-1])
+        final_ss.append(s[-1])
+        final_rs.append(r[-1])
 
     stop_ts = np.array(stop_ts)
     final_vs = np.array(final_vs)
+    final_ss = np.array(final_ss)
+    final_rs = np.array(final_rs)
 
-    def normalize(arr):
-        return (arr - arr.min()) / (arr.max() - arr.min())
+    scores = final_ss
 
-    alpha = 0.75
-    beta = 0.25
-
-    stop_ts = normalize(stop_ts)
-    final_vs = normalize(final_vs)
-
-    scores = alpha * stop_ts + beta * final_vs
-
-    plt.plot(c_space, scores, label="scores")
-    plt.plot(c_space, stop_ts, label="Stop Ts")
-    plt.plot(c_space, final_vs, label="final vs")
+    plt.plot(c_space, scores, label="Final SS")
 
     plt.xlabel("c")
     plt.ylabel("metrics")
     plt.title("Scores vs C Parameter")
 
-    c_opt = c_space[np.argmin(scores)]
+    c_opt = c_space[np.argmax(scores)]
     print(f"Optimal c parameter: {c_opt}")
 
     plt.legend()
