@@ -1,1 +1,1 @@
-@rm -rf results/*/*
+@rm -rf results/sims/*
