@@ -7,11 +7,13 @@ from tqdm import tqdm
 from vaccination_polices import make_parameterized_policy
 from simulation import simulation_results
 
-def try_policy(policy: Callable) -> Any:
+def try_policy(policy: Callable, tao: float=0.8, kappa: float=4) -> Any:
     """Tries a policy out and generates simulation results with default parameters
 
     Args:
         policy (Callable): The vaccination policy
+        tao (float, optional): The infection rate. Defaults to 0.8.
+        kappa (float, optional): The recovery time. Defaults to 4.
 
     Returns:
         Any: The simulation results
@@ -22,10 +24,12 @@ def try_policy(policy: Callable) -> Any:
         show_plot=True,
         generate_plot=True,
         save_results=False,
-        vaccination_policy=policy
+        vaccination_policy=policy,
+        tao=tao,
+        kappa=kappa
     )
 
-def test_policy(s: float, i: float, r: float, v: float, c: float) -> float:
+def test_policy(s: float, i: float, r: float, v: float, c: float, tao: float, kappa: float) -> float:
     """Vaccination policy that returns a derivative proportional to the susceptible proportion divided by the infected proportion
 
     Args:
@@ -33,6 +37,8 @@ def test_policy(s: float, i: float, r: float, v: float, c: float) -> float:
         i (float): The current infected proportion
         r (float): The current recovered proportion
         v (float): The current vaccinated proportion
+        tao (float): The infection rate
+        kappa (float): The recovery time
         c (float): The parameter of the policy
 
     Returns:

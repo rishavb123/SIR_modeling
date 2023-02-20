@@ -37,7 +37,7 @@ def f(
     """
     s, i, r, v = x
 
-    dV_dt = vaccination_policy(s, i, r, v)
+    dV_dt = vaccination_policy(s, i, r, v, tao, kappa)
 
     return [-tao * s * i - dV_dt, tao * s * i - i / kappa, i / kappa, dV_dt]
 
