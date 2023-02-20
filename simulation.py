@@ -178,6 +178,10 @@ def simulation_results(
     Returns:
         Any: The simulation solution results including many solution properties
     """
+
+    if tao % 1 == 0: tao = int(tao)
+    if kappa % 1 == 0: kappa = int(kappa)
+
     title = f"sir_model_s0_{s0}_i0_{i0}_r0_{r0}_v0_{v0}_tao_{tao}_kappa_{kappa}_{vaccination_policy.__name__}"
 
     sol = get_results(title) if not force_run else None
