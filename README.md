@@ -1,7 +1,16 @@
 # CX4230-MiniProject1
 
+a)
 Team Members: Rishav Bhagat and Ethan Povlot
 
 Team Number: 7
 
-Working Report: [Here](https://web.goodnotes.com/s/gk5MCV5TAFJek8br4EDkzf)
+b) 
+The report is in the file `Report.pdf`
+
+c)
+* All the simulation code (including the runner) is in `simulation.py`
+* `parameter_analysis.py` contains the code to run the simulation (with no vaccination) over tao within [0,4] and kappa within [1,5] and generate a heatmap of the stopping (convergence times) for analysis.
+* `vaccination_polices.py` contains some options for the vaccination policies and a way to handle hyper-parameters of vaccination policies.
+* `neat_policy.py` runs the NEAT algorithm to create a neural network vaccination policy that will automatically (through Neuro-Evolution) design a policy that maximizes the amount of susceptible people left at the converged solution.
+* `vaccination_tester.py` handles testing a vaccination policy by running the simulation multiple times with it, finding optimal hyper-parameters, and then plotting the resulting simulation using the optimal vaccination hyper-parameters.
