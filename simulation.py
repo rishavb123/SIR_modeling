@@ -232,12 +232,11 @@ def get_args() -> argparse.Namespace:
     """
 
     def vaccination_type(str):
-        neat_policy = get_saved_neural_policy()
         d = {
             "example": example_policy,
             "zero": zero_policy,
-            "neat": neat_policy,
-            "neural": neat_policy,
+            "neat": "neat_policy",
+            "neural": "neat_policy",
         }
         return d[str.replace("_policy", "")]
 
@@ -341,6 +340,7 @@ def get_args() -> argparse.Namespace:
 def main() -> None:
     """main runner function"""
     args = get_args()
+    policy = get_saved_neural_policy(args.tao, args.kappa) if args.vaccination_policy == "neat_policy" else args.vaccination_policy
     sol = simulation_results(
         s0=args.s0,
         i0=args.i0,
@@ -353,7 +353,7 @@ def main() -> None:
         show_plot=args.plot,
         generate_plot=not args.dont_generate_plot,
         save_results=not args.dont_save_results,
-        vaccination_policy=args.vaccination_policy,
+        vaccination_policy=policy,
         show_vaccinations=not args.dont_show_vaccinations,
     )
     print("Stopping Condition at t =", sol.t_events[0][0])
