@@ -64,6 +64,26 @@ def example_policy(
     """
     return c * s
 
+def designed_policy_beta(
+    s: float, i: float, r: float, v: float, tao: float, kappa: float, c: float
+) -> float:
+    """Vaccination policy that returns the equation discussed in the report
+
+    Args:
+        s (float): The current susceptible proportion
+        i (float): The current infected proportion
+        r (float): The current recovered proportion
+        v (float): The current vaccinated proportion
+        tao (float): The infection rate
+        kappa (float): The recovery time
+        c (float): The parameter of the policy
+
+    Returns:
+        float: the derivative of the vaccinated proportion
+    """
+    return 100 * (c * tao ** 0.9 * kappa ** 0.25 - v) * s
+
+designed_policy = make_parameterized_policy(name="designed_policy", c=0.6)(designed_policy_beta)
 
 hidden_layer_dim = 10
 

@@ -8,7 +8,7 @@ import numpy as np
 import scipy.integrate
 import matplotlib.pyplot as plt
 
-from vaccination_polices import zero_policy, example_policy, get_saved_neural_policy
+from vaccination_polices import zero_policy, example_policy, get_saved_neural_policy, designed_policy
 
 plt.style.use("dark_background")
 start_t = 0
@@ -235,6 +235,7 @@ def get_args() -> argparse.Namespace:
         d = {
             "example": example_policy,
             "zero": zero_policy,
+            "designed": designed_policy,
             "neat": "neat_policy",
             "neural": "neat_policy",
         }

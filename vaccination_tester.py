@@ -4,8 +4,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 from tqdm import tqdm
 
-from vaccination_polices import make_parameterized_policy
-from simulation import simulation_results
+from vaccination_polices import make_parameterized_policy, designed_policy_beta
+from simulation import simulation_results, unpack_values, get_args
 
 def try_policy(policy: Callable, tao: float=0.8, kappa: float=4) -> Any:
     """Tries a policy out and generates simulation results with default parameters
@@ -48,11 +48,9 @@ def test_policy(s: float, i: float, r: float, v: float, c: float, tao: float, ka
 
 def main() -> None:
     """main runner function"""
-    from simulation import simulation_results, unpack_values, get_args
-
     args = get_args()
 
-    c_space = np.linspace(0, 2, 20)
+    c_space = np.linspace(0, 1, 500)
     final_ss = []
     stop_ts = []
     final_vs = []
@@ -60,7 +58,7 @@ def main() -> None:
 
     for c in tqdm(c_space):
 
-        policy = make_parameterized_policy(name="test_1", c=c)(test_policy)
+        policy = make_parameterized_policy(c=c)(designed_policy_beta)
 
         sol = simulation_results(
             s0=args.s0,
@@ -90,7 +88,7 @@ def main() -> None:
 
     scores = final_ss
 
-    plt.plot(c_space, scores, label="Final SS")
+    plt.plot(c_space, scores, label="Final Susceptible Population")
 
     plt.xlabel("c")
     plt.ylabel("metrics")
@@ -100,6 +98,8 @@ def main() -> None:
     print(f"Optimal c parameter: {c_opt}")
 
     plt.legend()
+
+    plt.savefig(f"results/analysis/designed_model_beta_tune_tao_{args.tao}_kappa_{args.kappa}.png")
 
     plt.show()
 
